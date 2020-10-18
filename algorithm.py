@@ -1,0 +1,50 @@
+import numpy as np
+
+def string2matrix(st):
+    strMatrix = st[2:-2]
+    rows = strMatrix.split("]\n [")
+    # print(row)
+    matrix = []
+    for row in rows:
+        rowClean = row.replace("\n","")
+        matrix.append(np.fromstring(rowClean,dtype=int,sep=' '))
+    # print(np.array(matrix))
+    return np.array(matrix).copy()
+
+def encodeGraph(graph):
+    visited = [False]*len(graph)
+    labelNodes = graph.diagonal()
+    startNode = np.argmax(labelNodes)
+
+    queue = []
+    queue.append(startNode)
+    code = str(graph[startNode,startNode]) + '$'
+
+    while queue:
+        s = queue.pop(0)
+        visited[s] = True
+        levelStr = ''
+
+        edge_list = np.where(graph[s]>0)[0].tolist()
+        # Sort edge
+        node_list = [graph[x, x] for x in edge_list]
+
+        edge_list = list(sorted(zip(edge_list, node_list), key=lambda x: x[1], reverse=True))
+        # print(edge_list)
+
+        for i, _ in edge_list:
+            if not visited[i]:
+                if i not in queue:
+                    queue.append(i)
+                levelStr += str(graph[s,i]) + "_" + str(graph[i,i]) + "_"
+                # visited[i] = True
+
+        if levelStr != '':
+            code += levelStr[:-1] +  '$'
+
+    code += '#'
+
+    return code
+
+def canonicalForm(graph: np.ndarray, embeddings=None):
+    return {"tree": graph, "code": encodeGraph(graph)}
