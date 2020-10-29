@@ -4,14 +4,54 @@ from generate_graph import generate
 from margin import embedGraph, isGraphConnected, GraphCollection
 from algorithm import string2matrix
 from ExpansionGraph import ExpansionGraph
-from utils import plotGraph
+from utils import plotGraph, readGraphs, read_aligned_info
 
 def ensureConnected(graph):
     index_to_remove = []
+    list_of_subgraph = []
+    len_graph = len(graph)
+    total_visit = [False]*len_graph
 
-    for k in range(graph.shape[0]):
-        if np.sum(graph[k] > 0) <= 1:
-            index_to_remove.append(k)
+    start_idx = 0
+    while True:
+        visited = [False]*len_graph
+        queue = []
+        queue.append(start_idx)
+
+        while queue:
+            s = queue.pop(0)
+            visited[s] = True
+            total_visit[s] = True
+
+            edge_list = np.where(graph[s]>0)[0].tolist()
+            # Sort edge
+            node_list = [graph[x, x] for x in edge_list]
+
+            edge_list = list(sorted(zip(edge_list, node_list), key=lambda x: x[1], reverse=True))
+            # print(edge_list)
+
+            for i, _ in edge_list:
+                if not visited[i]:
+                    if i not in queue:
+                        queue.append(i)
+
+        if sum(visited) >= 0.5*len_graph:
+            index_to_remove = [i for i, x in enumerate(visited) if x == False]
+            break
+        else:
+            list_of_subgraph.append(visited)
+            if sum(total_visit) == len_graph:
+                list_num_node = [sum(x) for x in list_of_subgraph]
+                max_num_node = max(list_num_node)
+                max_idx = list_num_node.index(max_num_node)
+                index_to_remove = [i for i, x in enumerate(list_of_subgraph[max_idx]) if x == False]
+                break
+            else:
+                start_idx = total_visit.index(False)
+
+    # for k in range(graph.shape[0]):
+    #     if np.sum(graph[k] > 0) <= 1:
+    #         index_to_remove.append(k)
 
     index_to_remove.sort(reverse=True)
 
@@ -86,16 +126,23 @@ def hasNoExternalAssEdge(graphs, tree, embeddings):
     return True
 
 if __name__ == '__main__':
-    print("GENERATING GRAPHS...")
-    NUM_GRAPH = 100
-    THETA = 1.0
-    NUMBER_FOR_COMMON = THETA * NUM_GRAPH
-    graph_db, sg_link = generate(num_of_graphs=NUM_GRAPH, min_node=80, max_node=100,
-                                subgraph_size=70, node_degree=35,
-                                random_node=True, random_edge=True, plotSG=False)
+    # print("GENERATING GRAPHS...")
+    # NUM_GRAPH = 100
+    # THETA = 1.0
+    # NUMBER_FOR_COMMON = THETA * NUM_GRAPH
+    # graph_db, sg_link = generate(num_of_graphs=NUM_GRAPH, min_node=80, max_node=100,
+    #                             subgraph_size=70, node_degree=35,
+    #                             random_node=True, random_edge=True, plotSG=False)
+    print("LOADING GRAPHS...")
+    graph_db = readGraphs("mico.outx")
+    sg_link = read_aligned_info("aligned_info.txt")
 
-    print(graph_db)
-    print(sg_link)
+    NUM_GRAPH = graph_db.shape[0]
+    THETA = 0.715
+    NUMBER_FOR_COMMON = THETA * NUM_GRAPH
+
+    # print(graph_db)
+    # print(sg_link)
 
     print("COPYING SUBGRAPH...")
     subgraph_db = []
@@ -118,24 +165,6 @@ if __name__ == '__main__':
     # for x in subgraph_db:
     #     print(x)
     #     plotGraph(x.data, False)
-
-    # print("START MARGIN...")
-    # # Ensure all subgraph is explored at the same level
-    # min_edge = min([x.min_edge for x in subgraph_db])
-    # for i in range(len(subgraph_db)):
-    #     subgraph_db[i].generateSpecLattice(min_edge)
-    #
-    # MARGIN = GraphCollection(subgraph_db, 1.0)
-    # result = {"tree": [], "code": []}
-    #
-    # while len(result["code"]) == 0 and min_edge > 0:
-    #     MARGIN.graphs = subgraph_db
-    #     result = MARGIN.margin()
-    #
-    #     for i in range(len(subgraph_db)):
-    #         subgraph_db[i].generateNextLattice()
-    #
-    #     min_edge -= 1
 
     print("CHECKING SUBGRAPH...")
     # THETE cao thi dung min, thap thi dung max
@@ -212,8 +241,9 @@ if __name__ == '__main__':
 
     checked_node = copy.deepcopy(sg_link[candidate_index][0])
 
-    for idx in removed_idx:
-        del checked_node[idx]
+    # No need to remove isolated node in visited list
+    # for idx in removed_idx:
+    #     checked_node = np.delete(checked_node, idx)
 
     # Filter visited nodes in all graphs
     sg_link_visited = {}
@@ -246,6 +276,7 @@ if __name__ == '__main__':
     # Recheck external edge
     # Get list of frequent edges connected with candidate_sg
     # print(frequentEdgeSet)
+    # print(candidate_sg)
     print("CHECK EXTERNAL ASSOCIATIVE EDGE...")
     if hasNoExternalAssEdge(graph_db, candidate_sg, sg_link_visited):
         frequentEdgeSet = getFrequentEdges(graph_db, NUMBER_FOR_COMMON, sg_link_visited)
@@ -267,12 +298,8 @@ if __name__ == '__main__':
             max_sg_idx = np.argmax(list_num_edge)
             candidate_sg = list_sg[max_sg_idx]
 
-    # Truong hop: Graph co label node & canh giong nhau - OK
-    # Label node nhiều, không trọng số cạnh - OK
-    # directed graph
-    # degree tb khi generate - OK
     print("FINAL RESULT:")
     print(candidate_sg)
-    print(len(candidate_sg))
+    print(candidate_sg.shape[1])
     if candidate_sg.size > 0:
         plotGraph(candidate_sg, False)

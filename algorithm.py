@@ -14,6 +14,7 @@ def string2matrix(st):
 def encodeGraph(graph):
     visited = [False]*len(graph)
     labelNodes = graph.diagonal()
+    if len(labelNodes) == 0: return "$#"
     startNode = np.argmax(labelNodes)
 
     queue = []

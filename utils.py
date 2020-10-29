@@ -3,7 +3,55 @@ import os
 # from graph import Graph
 import networkx as nx
 import matplotlib.pyplot as plt
+import re
+import copy
 
+def read_aligned_info(path):
+    pattern_label = re.compile("^G[0-9]+[ \t]*G[0-9]+$")
+    pattern_data = re.compile("^[0-9]+[ \t]*[0-9]+$")
+
+    with open(path, 'r', encoding='utf-8') as file:
+        align_read = file.read()
+        align_read = align_read.split('\n')
+
+    label_idx = [i for i, x in enumerate(align_read) if re.match(pattern_label, x)]
+    aligned = [[] for _ in range(len(label_idx)+1)]
+
+    for each_idx in label_idx:
+        graph_pair = align_read[each_idx].split('\t')
+        graph_pair = [int(x[1:]) for x in graph_pair]
+        align_map = [[],[]]
+        dyn_i = each_idx + 1
+
+        while (re.match(pattern_data, align_read[dyn_i])):
+            mapping = align_read[dyn_i].split('\t')
+            align_map[0].append(int(mapping[0]))
+            align_map[1].append(int(mapping[1]))
+            dyn_i += 1
+
+        aligned[graph_pair[0]] = copy.deepcopy(align_map)
+
+    align_map = [aligned[-2][1].copy(), aligned[-2][1].copy()]
+
+    for link_map in aligned[-2::-1]:
+        temp_map = []
+        del_idx = []
+
+        for i, x in enumerate(align_map[1]):
+            if x in link_map[1]:
+                temp_map.append(link_map[0][link_map[1].index(x)])
+            else:
+                del_idx.append(i)
+
+        if del_idx:
+            for idx in del_idx.sort(reverse=True):
+                del align_map[0][idx]
+
+        align_map[1] = temp_map
+
+    aligned[-1] = align_map
+
+    return np.array(aligned)
 
 def read_graph_corpus(path, label_center_path=None):
     graphs = []
@@ -47,7 +95,7 @@ def readGraphs(path):
             g[e[0],e[1]] = l
             g[e[1],e[0]] = l
         graphs.append(g)#[:10,:10])
-    return graphs
+    return np.array(graphs)
 
 def plotGraph(graph : np.ndarray,isShowedID=True):
     edges = []
