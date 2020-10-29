@@ -5,6 +5,8 @@ from margin import embedGraph, isGraphConnected, GraphCollection
 from algorithm import string2matrix
 from ExpansionGraph import ExpansionGraph
 from utils import plotGraph, readGraphs, read_aligned_info
+import argparse
+import time
 
 def ensureConnected(graph):
     index_to_remove = []
@@ -126,6 +128,11 @@ def hasNoExternalAssEdge(graphs, tree, embeddings):
     return True
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--graph', help='Graph dataset', type=str, default="mico.outx")
+    parser.add_argument('--aligned', help='Aligned info', type=str, default="aligned_info.txt")
+    parser.add_argument('--theta', help='Theta', type=float, default=0.7)
+    args = parser.parse_args()
     # print("GENERATING GRAPHS...")
     # NUM_GRAPH = 100
     # THETA = 1.0
@@ -134,15 +141,16 @@ if __name__ == '__main__':
     #                             subgraph_size=70, node_degree=35,
     #                             random_node=True, random_edge=True, plotSG=False)
     print("LOADING GRAPHS...")
-    graph_db = readGraphs("mico.outx")
-    sg_link = read_aligned_info("aligned_info.txt")
+    graph_db = readGraphs(args.graph)
+    sg_link = read_aligned_info(args.aligned)
 
     NUM_GRAPH = graph_db.shape[0]
-    THETA = 0.715
+    THETA = args.theta
     NUMBER_FOR_COMMON = THETA * NUM_GRAPH
 
     # print(graph_db)
     # print(sg_link)
+    time_start = time.time()
 
     print("COPYING SUBGRAPH...")
     subgraph_db = []
@@ -298,8 +306,11 @@ if __name__ == '__main__':
             max_sg_idx = np.argmax(list_num_edge)
             candidate_sg = list_sg[max_sg_idx]
 
+    time_end = time.time()
+
     print("FINAL RESULT:")
     print(candidate_sg)
-    print(candidate_sg.shape[1])
+    print("Subgraph size: ", candidate_sg.shape[1])
+    print("Time: %.5f" % (time_end-time_start))
     if candidate_sg.size > 0:
         plotGraph(candidate_sg, False)
