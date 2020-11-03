@@ -44,7 +44,7 @@ def read_aligned_info(path):
                 del_idx.append(i)
 
         if del_idx:
-            for idx in del_idx.sort(reverse=True):
+            for idx in sorted(del_idx, reverse=True):
                 del align_map[0][idx]
 
         align_map[1] = temp_map

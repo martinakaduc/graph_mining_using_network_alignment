@@ -55,7 +55,7 @@ def ensureConnected(graph):
     #     if np.sum(graph[k] > 0) <= 1:
     #         index_to_remove.append(k)
 
-    index_to_remove.sort(reverse=True)
+    index_to_remove = sorted(index_to_remove, reverse=True)
 
     for k in index_to_remove:
         # Orphan node =>> need remove
@@ -148,8 +148,8 @@ if __name__ == '__main__':
     THETA = args.theta
     NUMBER_FOR_COMMON = THETA * NUM_GRAPH
 
-    # print(graph_db)
-    # print(sg_link)
+    print("Graphs Dataset: ", graph_db.shape)
+    print("Aligned Info: ", sg_link.shape)
     time_start = time.time()
 
     print("COPYING SUBGRAPH...")
