@@ -157,19 +157,26 @@ if __name__ == '__main__':
     total_nodes = []
     total_edges = []
 
+    error_occur = False
     for i, sg in enumerate(sg_link[:, 0]):
         length = len(sg)
         subgraph = np.zeros((length,length), dtype=np.int)
 
-        for k, node_0 in enumerate(sg):
-            for l, node_1 in enumerate(sg):
-                subgraph[k][l] = graph_db[i][node_0][node_1]
+        try:
+            for k, node_0 in enumerate(sg):
+                for l, node_1 in enumerate(sg):
+                    subgraph[k][l] = graph_db[i][node_0][node_1]
 
-        total_nodes.append(length)
-        total_edges.append((np.sum(subgraph > 0) - length) / 2)
+            total_nodes.append(length)
+            total_edges.append((np.sum(subgraph > 0) - length) / 2)
 
-        subgraph_db.append(subgraph)
+            subgraph_db.append(subgraph)
+        except:
+            print("Error occurs in graph %d" % i)
+            error_occur = True
 
+    if error_occur:
+        exit(0)
     # for x in subgraph_db:
     #     print(x)
     #     plotGraph(x.data, False)
