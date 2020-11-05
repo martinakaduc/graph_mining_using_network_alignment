@@ -183,14 +183,18 @@ if __name__ == '__main__':
 
     print("CHECKING SUBGRAPH...")
     # THETE cao thi dung min, thap thi dung max
-    min_node = max(total_nodes)
-    list_min_node = np.where(np.array(total_nodes) == min_node)[0]
+    max_node = max(total_nodes)
+    list_max_node = np.where(np.array(total_nodes) == max_node)[0]
+    # print(list_max_node)
 
-    min_edge = max(total_edges)
-    list_min_edge = np.where(np.array(total_edges) == min_edge)[0]
+    max_edge = max(total_edges)
+    list_max_edge = np.where(np.array(total_edges) == max_edge)[0]
+    # print(list_max_edge)
 
-    list_candidate_sg = np.intersect1d(list_min_node, list_min_edge)
+    list_candidate_sg = np.intersect1d(list_max_node, list_max_edge)
     # print(list_candidate_sg)
+    if len(list_candidate_sg) == 0:
+        list_candidate_sg = list_max_node
 
     candidate_sg = copy.deepcopy(subgraph_db[list_candidate_sg[0]])
     candidate_index = list_candidate_sg[0]
@@ -212,15 +216,17 @@ if __name__ == '__main__':
                 anchor_idx_0 = np.where(sg_link[cur_idx - 1][1] == node_link_0)[0]
                 anchor_idx_1 = np.where(sg_link[cur_idx - 1][1] == node_link_1)[0]
 
-                if anchor_idx_0.size > 0 and anchor_idx_1.size > 0:
+                if anchor_idx_0.shape[0] > 0 and anchor_idx_1.shape[0] > 0:
                     e_val = subgraph_db[cur_idx-1][anchor_idx_0[0]][anchor_idx_1[0]]
                     if e_val not in edge_val_list.keys():
                         edge_val_list[e_val] = 1
                     else:
                         edge_val_list[e_val] += 1
 
-                vertex_0 = anchor_idx_0[0]
-                vertex_1 = anchor_idx_1[0]
+                    vertex_0 = anchor_idx_0[0]
+                    vertex_1 = anchor_idx_1[0]
+                else:
+                    break
 
             vertex_0 = i
             vertex_1 = k
@@ -238,8 +244,10 @@ if __name__ == '__main__':
                     else:
                         edge_val_list[e_val] += 1
 
-                vertex_0 = anchor_idx_0[0]
-                vertex_1 = anchor_idx_1[0]
+                    vertex_0 = anchor_idx_0[0]
+                    vertex_1 = anchor_idx_1[0]
+                else:
+                    break
 
             # If count_freq < theta ===> delete edge
             count_freq = max(edge_val_list.values())
@@ -269,8 +277,9 @@ if __name__ == '__main__':
         align_node_list = []
 
         for node_i in refer_node_list:
-            node_align_i = np.where(alignment[1]  == node_i)[0][0]
-            align_node_list.append(alignment[0][node_align_i])
+            node_align_i = np.where(np.array(alignment[1])  == node_i)[0]
+            if node_align_i.size > 0:
+                align_node_list.append(alignment[0][node_align_i[0]])
 
         sg_link_visited[cur_idx-1] = [np.array(align_node_list)]
 
@@ -280,8 +289,9 @@ if __name__ == '__main__':
         align_node_list = []
 
         for node_i in refer_node_list:
-            node_align_i = np.where(alignment[0]  == node_i)[0][0]
-            align_node_list.append(alignment[1][node_align_i])
+            node_align_i = np.where(np.array(alignment[0])  == node_i)[0]
+            if node_align_i.size > 0:
+                align_node_list.append(alignment[1][node_align_i[0]])
 
         sg_link_visited[cur_idx+1] = [np.array(align_node_list)]
 
