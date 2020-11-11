@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import re
 import copy
 
-def read_aligned_info(path):
+def read_aligned_info(path, spliter=' '):
     pattern_label = re.compile("^G[0-9]+[ \t]*G[0-9]+$")
     pattern_data = re.compile("^[0-9]+[ \t]*[0-9]+$")
 
@@ -18,13 +18,13 @@ def read_aligned_info(path):
     aligned = [[] for _ in range(len(label_idx)+1)]
 
     for each_idx in label_idx:
-        graph_pair = align_read[each_idx].split('\t')
+        graph_pair = align_read[each_idx].split(spliter)
         graph_pair = [int(x[1:]) for x in graph_pair]
         align_map = [[],[]]
         dyn_i = each_idx + 1
 
         while (re.match(pattern_data, align_read[dyn_i])):
-            mapping = align_read[dyn_i].split('\t')
+            mapping = align_read[dyn_i].split(spliter)
             align_map[0].append(int(mapping[0]))
             align_map[1].append(int(mapping[1]))
             dyn_i += 1

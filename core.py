@@ -142,7 +142,7 @@ if __name__ == '__main__':
     #                             random_node=True, random_edge=True, plotSG=False)
     print("LOADING GRAPHS...")
     graph_db = readGraphs(args.graph)
-    sg_link = read_aligned_info(args.aligned)
+    sg_link = read_aligned_info(args.aligned, spliter=" ")
 
     NUM_GRAPH = graph_db.shape[0]
     THETA = args.theta
@@ -179,7 +179,7 @@ if __name__ == '__main__':
         exit(0)
     # for x in subgraph_db:
     #     print(x)
-    #     plotGraph(x.data, False)
+    #     plotGraph(x, False)
 
     print("CHECKING SUBGRAPH...")
     # THETE cao thi dung min, thap thi dung max
@@ -213,10 +213,10 @@ if __name__ == '__main__':
                 node_link_0 = sg_link[cur_idx][0][vertex_0]
                 node_link_1 = sg_link[cur_idx][0][vertex_1]
 
-                anchor_idx_0 = np.where(sg_link[cur_idx - 1][1] == node_link_0)[0]
-                anchor_idx_1 = np.where(sg_link[cur_idx - 1][1] == node_link_1)[0]
+                anchor_idx_0 = np.where(np.array(sg_link[cur_idx - 1][1]) == node_link_0)[0]
+                anchor_idx_1 = np.where(np.array(sg_link[cur_idx - 1][1]) == node_link_1)[0]
 
-                if anchor_idx_0.shape[0] > 0 and anchor_idx_1.shape[0] > 0:
+                if anchor_idx_0.size > 0 and anchor_idx_1.size > 0:
                     e_val = subgraph_db[cur_idx-1][anchor_idx_0[0]][anchor_idx_1[0]]
                     if e_val not in edge_val_list.keys():
                         edge_val_list[e_val] = 1
@@ -234,8 +234,8 @@ if __name__ == '__main__':
                 node_link_0 = sg_link[cur_idx][1][vertex_0]
                 node_link_1 = sg_link[cur_idx][1][vertex_1]
 
-                anchor_idx_0 = np.where(sg_link[cur_idx + 1][0] == node_link_0)[0]
-                anchor_idx_1 = np.where(sg_link[cur_idx + 1][0] == node_link_1)[0]
+                anchor_idx_0 = np.where(np.array(sg_link[cur_idx + 1][0]) == node_link_0)[0]
+                anchor_idx_1 = np.where(np.array(sg_link[cur_idx + 1][0]) == node_link_1)[0]
 
                 if anchor_idx_0.size > 0 and anchor_idx_1.size > 0:
                     e_val = subgraph_db[cur_idx+1][anchor_idx_0[0]][anchor_idx_1[0]]
