@@ -6,6 +6,37 @@ import matplotlib.pyplot as plt
 import re
 import copy
 
+def write_graph(graphs, file_name):
+    with open(file_name, mode='w', encoding='utf-8') as file:
+        for i, graph in enumerate(graphs):
+            visited = [False]*len(graph)
+            labelNodes = graph.diagonal()
+
+            file. writelines("t # %d\n" % i)
+            for node_i, node_label in enumerate(labelNodes):
+                file.write("v %d %d\n" % (node_i, node_label))
+
+            startNode = np.argmax(labelNodes)
+            queue = []
+            queue.append(startNode)
+
+            while queue:
+                s = queue.pop(0)
+                visited[s] = True
+
+                edge_list = np.where(graph[s]>0)[0].tolist()
+                # Sort edge
+                node_list = [graph[x, x] for x in edge_list]
+
+                edge_list = list(sorted(zip(edge_list, node_list), key=lambda x: x[1], reverse=True))
+                # print(edge_list)
+
+                for i, _ in edge_list:
+                    if not visited[i]:
+                        if i not in queue:
+                            queue.append(i)
+                        file.writelines("e %d %d %d\n" % (s, i, graph[s,i]))
+                        
 def read_aligned_info(path, spliter=' '):
     pattern_label = re.compile("^G[0-9]+[ \t]*G[0-9]+$")
     pattern_data = re.compile("^[0-9]+[ \t]*[0-9]+$")
@@ -15,7 +46,7 @@ def read_aligned_info(path, spliter=' '):
         align_read = align_read.split('\n')
 
     label_idx = [i for i, x in enumerate(align_read) if re.match(pattern_label, x)]
-    aligned = [[] for _ in range(len(label_idx)+1)]
+    aligned = [[] for _ in range(len(label_idx))]
 
     for each_idx in label_idx:
         graph_pair = align_read[each_idx].split(spliter)
@@ -31,25 +62,25 @@ def read_aligned_info(path, spliter=' '):
 
         aligned[graph_pair[0]] = copy.deepcopy(align_map)
 
-    align_map = [aligned[-2][1].copy(), aligned[-2][1].copy()]
-
-    for link_map in aligned[-2::-1]:
-        temp_map = []
-        del_idx = []
-
-        for i, x in enumerate(align_map[1]):
-            if x in link_map[1]:
-                temp_map.append(link_map[0][link_map[1].index(x)])
-            else:
-                del_idx.append(i)
-
-        if del_idx:
-            for idx in sorted(del_idx, reverse=True):
-                del align_map[0][idx]
-
-        align_map[1] = temp_map
-
-    aligned[-1] = align_map
+    # align_map = [aligned[-2][1].copy(), aligned[-2][1].copy()]
+    #
+    # for link_map in aligned[-2::-1]:
+    #     temp_map = []
+    #     del_idx = []
+    #
+    #     for i, x in enumerate(align_map[1]):
+    #         if x in link_map[1]:
+    #             temp_map.append(link_map[0][link_map[1].index(x)])
+    #         else:
+    #             del_idx.append(i)
+    #
+    #     if del_idx:
+    #         for idx in sorted(del_idx, reverse=True):
+    #             del align_map[0][idx]
+    #
+    #     align_map[1] = temp_map
+    #
+    # aligned[-1] = align_map
 
     return np.array(aligned)
 
