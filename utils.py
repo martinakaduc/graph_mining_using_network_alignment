@@ -46,12 +46,13 @@ def read_aligned_info(path, spliter=' '):
         align_read = align_read.split('\n')
 
     label_idx = [i for i, x in enumerate(align_read) if re.match(pattern_label, x)]
-    aligned = [[] for _ in range(len(label_idx))]
+    aligned = []
+    mapping_gid = {}
 
-    for each_idx in label_idx:
+    for i, each_idx in enumerate(label_idx):
         graph_pair = align_read[each_idx].split(spliter)
         graph_pair = [int(x[1:]) for x in graph_pair]
-        align_map = [[],[]]
+        align_map = [[], []]
         dyn_i = each_idx + 1
 
         while (re.match(pattern_data, align_read[dyn_i])):
@@ -60,7 +61,8 @@ def read_aligned_info(path, spliter=' '):
             align_map[1].append(int(mapping[1]))
             dyn_i += 1
 
-        aligned[graph_pair[0]] = copy.deepcopy(align_map)
+        mapping_gid[i] = graph_pair[0]
+        aligned.append(align_map)
 
     # align_map = [aligned[-2][1].copy(), aligned[-2][1].copy()]
     #
@@ -82,7 +84,7 @@ def read_aligned_info(path, spliter=' '):
     #
     # aligned[-1] = align_map
 
-    return np.array(aligned)
+    return np.array(aligned, dtype=np.object), mapping_gid
 
 def read_graph_corpus(path, label_center_path=None):
     graphs = []
@@ -114,7 +116,7 @@ def read_graph_corpus(path, label_center_path=None):
             graphs.append((nodes,edges))
     return graphs#[10:]
 
-def readGraphs(path):
+def readGraphs(path, list_gid=None):
     rawGraphs = read_graph_corpus(path)
     graphs = []
     for graph in rawGraphs:
@@ -126,6 +128,12 @@ def readGraphs(path):
             g[e[0],e[1]] = l
             g[e[1],e[0]] = l
         graphs.append(g)#[:10,:10])
+
+    if list_gid != None:
+        for i in range(len(graphs)-1, -1, -1):
+            if i not in list_gid:
+                del graphs[i]
+                
     return np.array(graphs)
 
 def plotGraph(graph : np.ndarray,isShowedID=True):

@@ -133,7 +133,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--graph', help='Graph dataset', type=str, default="mico.outx")
     parser.add_argument('--aligned', help='Aligned info', type=str, default="aligned_info.txt")
-    parser.add_argument('--theta', help='Theta', type=float, default=0.5)
+    parser.add_argument('--theta', help='Theta', type=int, default=0)
     args = parser.parse_args()
     # print("GENERATING GRAPHS...")
     # NUM_GRAPH = 100
@@ -143,12 +143,12 @@ if __name__ == '__main__':
     #                             subgraph_size=70, node_degree=35,
     #                             random_node=True, random_edge=True, plotSG=False)
     print("LOADING GRAPHS...")
-    graph_db = readGraphs(args.graph)
-    sg_link = read_aligned_info(args.aligned, spliter=" ")
+    sg_link, mapping_gid = read_aligned_info(args.aligned, spliter=" ")
+    graph_db = readGraphs(args.graph, list(mapping_gid.values()))
 
     NUM_GRAPH = graph_db.shape[0]
     THETA = args.theta
-    NUMBER_FOR_COMMON = THETA * NUM_GRAPH
+    NUMBER_FOR_COMMON = THETA
 
     print("Graphs Dataset: ", graph_db.shape)
     print("Aligned Info: ", sg_link.shape)
@@ -325,7 +325,7 @@ if __name__ == '__main__':
     print("CHECK EXTERNAL ASSOCIATIVE EDGE...")
     frequentEdgeSet = getFrequentEdges(graph_db, NUMBER_FOR_COMMON, sg_link_visited, missing_chain)
     # print(frequentEdgeSet)
-    
+
     if hasNoExternalAssEdge(graph_db, candidate_sg, sg_link_visited):
         padding_candidate_sg = candidate_sg.copy()
         for key, value in frequentEdgeSet.items():
@@ -388,5 +388,5 @@ if __name__ == '__main__':
     print(candidate_sg)
     print("Subgraph size: ", candidate_sg.shape[1])
     print("Time: %.5f" % (time_end-time_start))
-    if candidate_sg.size > 0:
-        plotGraph(candidate_sg, False)
+    # if candidate_sg.size > 0:
+    #     plotGraph(candidate_sg, False)
