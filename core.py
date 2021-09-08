@@ -389,11 +389,11 @@ if __name__ == '__main__':
     print("t # 0")
     for i in range(len(candidate_sg)):
         print("v %d %d" % (i, candidate_sg[i][i]))
-        
+
     for i in range(len(candidate_sg)):
         for j in range(i+1, len(candidate_sg)):
             if candidate_sg[i][j] > 0:
-                print("e %d %d" % (i, j))
+                print("e %d %d %d" % (i, j, candidate_sg[i][j]))
 
     print("Subgraph size: ", candidate_sg.shape[1])
     print("Time: %.5f" % (time_end-time_start))
