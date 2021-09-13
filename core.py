@@ -158,8 +158,8 @@ if __name__ == '__main__':
         sg_link = np.load(args.sg_link, allow_pickle=True)
         mapping_gid = pickle.load(open(args.mapping_gid, "rb"))
 
-    print(sg_link)
-    print(mapping_gid)
+    # print(sg_link)
+    # print(mapping_gid)
 
     graph_db = readGraphs(args.graph, list(mapping_gid.values()))
 
@@ -449,7 +449,7 @@ if __name__ == '__main__':
                             continue
 
                         # print(position_count_fn, position_count_sn)
-                        print(fn_idx, sn_idx)
+                        # print(fn_idx, sn_idx)
                         if fn_idx >= padding_candidate_sg.shape[0]:
                             padding_candidate_sg = np.pad(padding_candidate_sg, [(0,1),(0,1)])
                             padding_candidate_sg[-1][-1] = edge[0]
@@ -464,7 +464,7 @@ if __name__ == '__main__':
                         else:
                             sn_idx_e = sn_idx
 
-                        print(len(padding_candidate_sg))
+                        # print(len(padding_candidate_sg))
 
                         padding_candidate_sg[fn_idx_e][sn_idx_e] = edge[2]
                         padding_candidate_sg[sn_idx_e][fn_idx_e] = edge[2]
