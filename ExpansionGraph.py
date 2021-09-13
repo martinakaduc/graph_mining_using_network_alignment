@@ -63,7 +63,7 @@ class ExpansionGraph():
         codeFullGraph = self.mergeToGraph(graph,canEdges)
         if codeFullGraph in self.spaceGraphs:
             if len(self.spaceGraphs[codeFullGraph].items()) >= self.theta:
-                print("bottom-up aval: \n",codeFullGraph)
+                # print("bottom-up aval: \n",codeFullGraph)
                 # exit(0)
                 return {
                     codeFullGraph : self.spaceGraphs[codeFullGraph]

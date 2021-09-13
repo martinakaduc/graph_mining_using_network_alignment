@@ -130,10 +130,10 @@ def hasNoExternalAssEdge(graphs, tree, embeddings):
                         externalEdges[edge]  = 1
         for k,v in externalEdges.items():
             if v == numEmb:
-                print("Has External Associative Edge",tree)
+                # print("Has External Associative Edge",tree)
                 return False
 
-    print("Has NO External Associative Edge")
+    # print("Has NO External Associative Edge")
     return True
 
 if __name__ == '__main__':
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # graph_db, sg_link = generate(num_of_graphs=NUM_GRAPH, min_node=80, max_node=100,
     #                             subgraph_size=70, node_degree=35,
     #                             random_node=True, random_edge=True, plotSG=False)
-    print("LOADING GRAPHS...")
+    # print("LOADING GRAPHS...")
     if args.aligned != "":
         sg_link, mapping_gid = read_aligned_info(args.aligned, spliter=" ")
     else:
@@ -167,11 +167,11 @@ if __name__ == '__main__':
     THETA = args.theta
     NUMBER_FOR_COMMON = THETA
 
-    print("Graphs Dataset: ", graph_db.shape)
-    print("Aligned Info: ", sg_link.shape)
+    # print("Graphs Dataset: ", graph_db.shape)
+    # print("Aligned Info: ", sg_link.shape)
     time_start = time.time()
 
-    print("COPYING SUBGRAPH...")
+    # print("COPYING SUBGRAPH...")
     subgraph_db = []
     total_nodes = []
     total_edges = []
@@ -200,7 +200,7 @@ if __name__ == '__main__':
     #     print(x)
     #     plotGraph(x, False)
 
-    print("CHECKING SUBGRAPH...")
+    # print("CHECKING SUBGRAPH...")
     # THETE cao thi dung min, thap thi dung max
     max_node = max(total_nodes)
     list_max_node = np.where(np.array(total_nodes) == max_node)[0]
@@ -288,8 +288,8 @@ if __name__ == '__main__':
                 candidate_sg[k][i] = e_val
 
     # Check missing chain
-    print("FOUND MISSING CHAIN...")
-    print(missing_chain)
+    # print("FOUND MISSING CHAIN...")
+    # print(missing_chain)
 
     # Ensure graph is isGraphConnected
     candidate_sg, removed_idx = ensureConnected(candidate_sg)
@@ -335,7 +335,7 @@ if __name__ == '__main__':
     # Get list of frequent edges connected with candidate_sg
     # print(frequentEdgeSet)
     # print(candidate_sg)
-    print("CHECK EXTERNAL ASSOCIATIVE EDGE...")
+    # print("CHECK EXTERNAL ASSOCIATIVE EDGE...")
     padding_candidate_sg = candidate_sg.copy()
 
     while True:
@@ -474,7 +474,7 @@ if __name__ == '__main__':
 
     time_end = time.time()
 
-    print("FINAL RESULT:")
+    # print("FINAL RESULT:")
     # print(candidate_sg)
     print("t # 0")
     for i in range(len(candidate_sg)):
@@ -485,6 +485,8 @@ if __name__ == '__main__':
             if candidate_sg[i][j] > 0:
                 print("e %d %d %d" % (i, j, candidate_sg[i][j]))
 
+    print("\nSupport:", len(sg_link_visited))
+    print("where:", list(sg_link_visited.keys()), "\n")
     print("Subgraph size: ", candidate_sg.shape[1])
     print("Time: %.5f" % (time_end-time_start))
     # if candidate_sg.size > 0:
