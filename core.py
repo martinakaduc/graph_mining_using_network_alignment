@@ -361,8 +361,11 @@ if __name__ == '__main__':
 
                         # TODO: UPDATE sg_link_visited
 
-                    else:
+                    elif value[candidate_index][v_i][0] in absolute_mapping:
                         link_0 = np.where(np.array(absolute_mapping) == value[candidate_index][v_i][0])[0][0]
+                    else:
+                        del value[candidate_index][v_i]
+                        continue
 
                     if value[candidate_index][v_i][1] not in absolute_mapping and \
                         value[candidate_index][v_i][1] in sg_link_visited[candidate_index][0]:
@@ -372,8 +375,12 @@ if __name__ == '__main__':
                         absolute_mapping = np.append(absolute_mapping, value[candidate_index][v_i][1])
                         # TODO: UPDATE sg_link_visited
 
-                    else:
+                    elif value[candidate_index][v_i][1] in absolute_mapping:
                         link_1 = np.where(np.array(absolute_mapping) == value[candidate_index][v_i][1])[0][0]
+
+                    else:
+                        del value[candidate_index][v_i]
+                        continue
 
                     padding_candidate_sg[link_0][link_1] = key[2]
                     padding_candidate_sg[link_1][link_0] = key[2]
@@ -381,6 +388,7 @@ if __name__ == '__main__':
                 # print(padding_candidate_sg)
             # print(sg_link_visited)
             # print(len(padding_candidate_sg))
+            # exit(0)
             eg = ExpansionGraph(
                 padding_candidate_sg,
                 sg_link_visited,
@@ -411,7 +419,7 @@ if __name__ == '__main__':
         for edge, edge_emb in frequentEdgeSet.items():
             if chose_set.issubset(frozenset(edge_emb.keys())):
                 # Add this edge to candidate_sg, update sg_link_visited and remove it out frequentEdgeSet
-                # print(sg_link_visited)
+                # print(sg_link_visited[candidate_index])
                 local_sg_link_visited = copy.deepcopy(sg_link_visited)
                 position_count_fn = defaultdict(lambda: 0)
                 position_count_sn = defaultdict(lambda: 0)

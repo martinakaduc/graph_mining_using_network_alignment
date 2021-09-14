@@ -58,11 +58,10 @@ class ExpansionGraph():
     def searchGraph(self,graph,canEdges):
         newTempGrapsearchGraphhs = {}
         encodeGraph = np.array2string(graph)
-
         #bottom-up pruning
         codeFullGraph = self.mergeToGraph(graph,canEdges)
         if codeFullGraph in self.spaceGraphs:
-            if len(self.spaceGraphs[codeFullGraph].items()) >= self.theta:
+            if len(self.spaceGraphs[codeFullGraph]) >= self.theta:
                 # print("bottom-up aval: \n",codeFullGraph)
                 # exit(0)
                 return {
@@ -91,7 +90,7 @@ class ExpansionGraph():
                     if embedCanGraph not in self.spaceGraphs:
                         self.spaceGraphs[embedCanGraph] = {}
                     self.spaceGraphs[embedCanGraph][j] = topo
-                    print("canIsTrue: \n",canGraph)
+                    # print("canIsTrue: \n",canGraph)
             # self.searchGraph(canGraph,canEdges[i+1:]) if (embedCanGraph in self.spaceGraphs) else self.searchGraph(graph,canEdges[i+1:])
             if embedCanGraph in self.spaceGraphs:
                 self.searchGraph(canGraph,canEdges[i+1:])
