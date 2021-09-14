@@ -31,7 +31,13 @@ class ExpansionGraph():
             iC = indices[1][i]
             k = tuple(sorted((self.matrixAdj[iR,iR],self.matrixAdj[iC,iC])))
             if k in mapEdges and iR <= iC:
-                canEdges.append((iR,iC,mapEdges[k]))
+                local_freq_count = 0
+                for gid, embeddings in freqEdges[(k[0], k[1], mapEdges[k])].items():
+                    if (iR, iC) in embeddings or (iC, iR) in embeddings:
+                        local_freq_count += 1
+
+                if local_freq_count >= self.theta:
+                    canEdges.append((iR,iC,mapEdges[k]))
         # print("canEdges",canEdges)
         self.canEdges = canEdges
         # return canEdges
