@@ -80,6 +80,7 @@ def getFrequentEdges(graphs, theta, sg_link_visited=None, missing_chain=None):
 
                 if sg_link_visited != None and missing_chain != None and idGraph in sg_link_visited:
                     if i in sg_link_visited[idGraph][0] and i+des+1 in sg_link_visited[idGraph][0]:
+                        continue
                         fni = np.where(sg_link_visited[idGraph][0] == i)[0][0]
                         sni = np.where(sg_link_visited[idGraph][0] == i+des+1)[0][0]
                         if tuple(sorted([fni, sni])) not in missing_chain:
@@ -114,7 +115,9 @@ def hasNoExternalAssEdge(graphs, tree, embeddings):
         externalEdges = {}
 
         for idGraph in embeddings.keys():
+            # print(embeddings[idGraph])
             for subGraph in embeddings[idGraph]:
+                # print(subGraph)
                 curNode = subGraph[i]
                 indices = np.where(graphs[idGraph][curNode] > 0)[0] # neighbor of curNode
                 nodes = list(set(indices) - set(subGraph)) # node not in subgraph of node curNode
@@ -316,7 +319,7 @@ if __name__ == '__main__':
             if node_align_i.size > 0:
                 align_node_list.append(alignment[0][node_align_i[0]])
 
-        if len(align_node_list) > 0:
+        if len(align_node_list) >= len(absolute_mapping):
             sg_link_visited[cur_idx-1] = [np.array(align_node_list)]
 
     for cur_idx in range(candidate_index, NUM_GRAPH-1):
@@ -331,7 +334,7 @@ if __name__ == '__main__':
             if node_align_i.size > 0:
                 align_node_list.append(alignment[1][node_align_i[0]])
 
-        if len(align_node_list) > 0:
+        if len(align_node_list) >= len(absolute_mapping):
             sg_link_visited[cur_idx+1] = [np.array(align_node_list)]
 
     # print(sg_link)
@@ -341,6 +344,7 @@ if __name__ == '__main__':
     # Get list of frequent edges connected with candidate_sg
     # print(frequentEdgeSet)
     # print(candidate_sg)
+    # exit(0)
     # print("CHECK EXTERNAL ASSOCIATIVE EDGE...")
     padding_candidate_sg = candidate_sg.copy()
 
@@ -352,12 +356,14 @@ if __name__ == '__main__':
             for key, value in frequentEdgeSet.items():
                 link_0 = 0
                 link_1 = 0
+                if candidate_index not in value:
+                    continue
                 # print(value)
-                # print(value[candidate_index][0][0])
+                # print(value[candidate_index])
                 # print(sg_link_visited[candidate_index][0])
                 # print(absolute_mapping)
-
-                for v_i in range(len(value[candidate_index])):
+                v_i = 0
+                while v_i < len(value[candidate_index]):
                     if value[candidate_index][v_i][0] not in absolute_mapping and \
                         value[candidate_index][v_i][0] in sg_link_visited[candidate_index][0]:
                         padding_candidate_sg = np.pad(padding_candidate_sg, [(0,1),(0,1)])
@@ -390,6 +396,7 @@ if __name__ == '__main__':
 
                     padding_candidate_sg[link_0][link_1] = key[2]
                     padding_candidate_sg[link_1][link_0] = key[2]
+                    v_1 += 1
                 # print(absolute_mapping)
                 # print(padding_candidate_sg)
             # print(sg_link_visited)
@@ -430,17 +437,18 @@ if __name__ == '__main__':
                 position_count_fn = defaultdict(lambda: 0)
                 position_count_sn = defaultdict(lambda: 0)
                 for gid, list_in_graph_emb in edge_emb.items():
-                    for each_graph_emb in list_in_graph_emb:
-                        if all([each_graph_emb[0] not in xyz.tolist() for xyz in local_sg_link_visited[gid]]):
-                            for ee_idx, each_ele in enumerate(local_sg_link_visited[gid]):
-                                local_sg_link_visited[gid][ee_idx] = np.append(each_ele, each_graph_emb[0])
+                    if gid in local_sg_link_visited:
+                        for each_graph_emb in list_in_graph_emb:
+                            if all([each_graph_emb[0] not in xyz.tolist() for xyz in local_sg_link_visited[gid]]):
+                                for ee_idx, each_ele in enumerate(local_sg_link_visited[gid]):
+                                    local_sg_link_visited[gid][ee_idx] = np.append(each_ele, each_graph_emb[0])
 
-                        if all([each_graph_emb[1] not in xyz.tolist() for xyz in local_sg_link_visited[gid]]):
-                            for ee_idx, each_ele in enumerate(local_sg_link_visited[gid]):
-                                local_sg_link_visited[gid][ee_idx] = np.append(each_ele, each_graph_emb[1])
+                            if all([each_graph_emb[1] not in xyz.tolist() for xyz in local_sg_link_visited[gid]]):
+                                for ee_idx, each_ele in enumerate(local_sg_link_visited[gid]):
+                                    local_sg_link_visited[gid][ee_idx] = np.append(each_ele, each_graph_emb[1])
 
-                        position_count_fn[local_sg_link_visited[gid][0].tolist().index(each_graph_emb[0])] += 1
-                        position_count_sn[local_sg_link_visited[gid][0].tolist().index(each_graph_emb[1])] += 1
+                            position_count_fn[local_sg_link_visited[gid][0].tolist().index(each_graph_emb[0])] += 1
+                            position_count_sn[local_sg_link_visited[gid][0].tolist().index(each_graph_emb[1])] += 1
 
                 # fn_idx = max(position_count_fn.items(), key=operator.itemgetter(1))[0]
                 # sn_idx = max(position_count_sn.items(), key=operator.itemgetter(1))[0]
@@ -478,13 +486,14 @@ if __name__ == '__main__':
                         else:
                             sn_idx_e = sn_idx
 
-                        # print(len(padding_candidate_sg))
-
                         padding_candidate_sg[fn_idx_e][sn_idx_e] = edge[2]
                         padding_candidate_sg[sn_idx_e][fn_idx_e] = edge[2]
 
                 sg_link_visited = local_sg_link_visited
                 absolute_mapping = local_sg_link_visited[candidate_index][0]
+
+            # print(padding_candidate_sg)
+            # print(sg_link_visited)
 
     time_end = time.time()
 
