@@ -78,7 +78,7 @@ def getFrequentEdges(graphs, theta, sg_link_visited=None, missing_chain=None):
                 labelNodes = sorted(labelNodes)#,reverse=True)
                 encodeEdges = (labelNodes[0], labelNodes[1], graph[i,i+des+1])
 
-                if sg_link_visited != None and missing_chain != None:
+                if sg_link_visited != None and missing_chain != None and idGraph in sg_link_visited:
                     if i in sg_link_visited[idGraph][0] and i+des+1 in sg_link_visited[idGraph][0]:
                         fni = np.where(sg_link_visited[idGraph][0] == i)[0][0]
                         sni = np.where(sg_link_visited[idGraph][0] == i+des+1)[0][0]
@@ -305,6 +305,8 @@ if __name__ == '__main__':
     sg_link_visited = {}
     sg_link_visited[candidate_index] = [copy.deepcopy(absolute_mapping)]
     for cur_idx in range(candidate_index, 0, -1):
+        if cur_idx not in sg_link_visited:
+            break
         refer_node_list = sg_link_visited[cur_idx][0]
         alignment = sg_link[cur_idx-1]
         align_node_list = []
@@ -314,9 +316,12 @@ if __name__ == '__main__':
             if node_align_i.size > 0:
                 align_node_list.append(alignment[0][node_align_i[0]])
 
-        sg_link_visited[cur_idx-1] = [np.array(align_node_list)]
+        if len(align_node_list) > 0:
+            sg_link_visited[cur_idx-1] = [np.array(align_node_list)]
 
     for cur_idx in range(candidate_index, NUM_GRAPH-1):
+        if cur_idx not in sg_link_visited:
+            break
         refer_node_list = sg_link_visited[cur_idx][0]
         alignment = sg_link[cur_idx]
         align_node_list = []
@@ -326,7 +331,8 @@ if __name__ == '__main__':
             if node_align_i.size > 0:
                 align_node_list.append(alignment[1][node_align_i[0]])
 
-        sg_link_visited[cur_idx+1] = [np.array(align_node_list)]
+        if len(align_node_list) > 0:
+            sg_link_visited[cur_idx+1] = [np.array(align_node_list)]
 
     # print(sg_link)
     # print(sg_link_visited)
@@ -338,7 +344,7 @@ if __name__ == '__main__':
     # print("CHECK EXTERNAL ASSOCIATIVE EDGE...")
     padding_candidate_sg = candidate_sg.copy()
 
-    while True:
+    while len(sg_link_visited) >= NUMBER_FOR_COMMON and len(candidate_sg) > 1:
         frequentEdgeSet = getFrequentEdges(graph_db, NUMBER_FOR_COMMON, sg_link_visited, missing_chain)
         # print(frequentEdgeSet)
 
